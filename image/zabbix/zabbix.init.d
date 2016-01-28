@@ -87,11 +87,11 @@ server {
         root /usr/share/nginx/html/zabbix;
         index index.php;
 
-        location ~ \.php$ {
+        location ~ \\.php\$ {
                 fastcgi_pass 127.0.0.1:9000;
                 fastcgi_index  index.php;
-                #fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;
-                fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                #fastcgi_param  SCRIPT_FILENAME  /scripts\$fastcgi_script_name;
+                fastcgi_param  SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
                 include        fastcgi_params;
         }
 
