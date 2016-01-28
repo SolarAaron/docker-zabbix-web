@@ -59,4 +59,4 @@ Change the variable values to your situation.
     -e DB_NAME=zabbix-database \
     -e DB_USER=zabbix \
     -e DB_PASS=password \
-    enderson/zabbix-web:2.4
+    solarhelium/zabbix-web:2.4
