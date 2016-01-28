@@ -59,4 +59,4 @@ Change the variable values to your situation.
     -e DB_NAME=zabbix-database \
     -e DB_USER=zabbix \
     -e DB_PASS=password \
-    solarhelium/zabbix-web:2.4
+    solarhelium/docker-zabbix-web
