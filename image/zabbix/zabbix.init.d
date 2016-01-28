@@ -38,20 +38,6 @@ if [ -z "${DB_TYPE}" ]; then
   exit 1
 fi
 
-sed 's/{{DB_HOST}}/'"${DB_HOST}"'/' -i /etc/zabbix/web/zabbix.conf.php
-sed 's/{{DB_PORT}}/'"${DB_PORT}"'/' -i /etc/zabbix/web/zabbix.conf.php
-sed 's/{{DB_NAME}}/'"${DB_NAME}"'/' -i /etc/zabbix/web/zabbix.conf.php
-sed 's/{{DB_USER}}/'"${DB_USER}"'/' -i /etc/zabbix/web/zabbix.conf.php
-sed 's/{{DB_PASS}}/'"${DB_PASS}"'/' -i /etc/zabbix/web/zabbix.conf.php
-sed 's/{{DB_TYPE}}/'"${DB_TYPE}"'/' -i /etc/zabbix/web/zabbix.conf.php
-
-###
-# Web
-###
-
-SERVER_NAME=${SERVER_NAME:-localhost}
-sed 's/{{SERVER_NAME}}/'"${SERVER_NAME}"'/' -i /etc/nginx/sites-enabled/zabbix.conf
-
 ZBX_SERVER=${ZBX_SERVER:-}
 ZBX_SERVER_PORT=${ZBX_SERVER_PORT:-10051}
 ZBX_SERVER_NAME=${ZBX_SERVER_NAME:-zabbix_server}
@@ -65,6 +51,49 @@ if [ -n ${ZBX_PORT_10051_TCP_ADDR} ]; then
   ZBX_SERVER_PORT=${ZBX_PORT_10051_TCP_PORT}
 fi
 
-sed 's/{{ZBX_SERVER}}/'"${ZBX_SERVER}"'/' -i /etc/zabbix/web/zabbix.conf.php
-sed 's/{{ZBX_SERVER_PORT}}/'"${ZBX_SERVER_PORT}"'/' -i /etc/zabbix/web/zabbix.conf.php
-sed 's/{{ZBX_SERVER_NAME}}/'"${ZBX_SERVER_NAME}"'/' -i /etc/zabbix/web/zabbix.conf.php
+cat >/etc/zabbix/web/zabbix.conf.php <<EOF
+<?php
+// Zabbix GUI configuration file
+global \$DB;
+
+\$DB['TYPE']     = '${DB_TYPE}';
+\$DB['SERVER']   = '${DB_HOST}';
+\$DB['PORT']     = '${DB_PORT}';
+\$DB['DATABASE'] = '${DB_NAME}';
+\$DB['USER']     = '${DB_USER}';
+\$DB['PASSWORD'] = '${DB_PASS}';
+
+// SCHEMA is relevant only for IBM_DB2 database
+\$DB['SCHEMA'] = '';
+
+\$ZBX_SERVER      = '${ZBX_SERVER}';
+\$ZBX_SERVER_PORT = '${ZBX_SERVER_PORT}';
+\$ZBX_SERVER_NAME = '${ZBX_SERVER_NAME}';
+
+\$IMAGE_FORMAT_DEFAULT = IMAGE_FORMAT_PNG;
+?>
+EOF
+
+###
+# Web
+###
+
+SERVER_NAME=${SERVER_NAME:-localhost}
+
+cat > /etc/nginx/sites-enabled/zabbix.conf <<EOF
+server {
+        listen 80;
+        server_name ${SERVER_NAME};
+        root /usr/share/nginx/html/zabbix;
+        index index.php;
+
+        location ~ \.php$ {
+                fastcgi_pass 127.0.0.1:9000;
+                fastcgi_index  index.php;
+                #fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;
+                fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                include        fastcgi_params;
+        }
+
+}
+EOF
