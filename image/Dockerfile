@@ -1,5 +1,5 @@
 FROM phusion/baseimage:0.9.16
-MAINTAINER Enderson Maia <endersonmaia@gmail.com>
+MAINTAINER SLR <solaraaron@gmail.com>
 
 ADD . /build
 
